@@ -8,6 +8,7 @@ import shutil
 import numpy as np
 from parse_splat_data import ParseSplatData
 
+
 class SplatExperimentRunner(object):
     '''
 
@@ -93,12 +94,16 @@ class SplatExperimentRunner(object):
             self.generateSplatTerrainFiles()
         #--splat command : splat -d ./sdfs  -t tx_site_2  -L 10.0 -R 10  -o tx_2_coverage  -ano tx_2_pathloss.dat
         #----now run the Splat experimente---#
-        print "Generating pathloss maps for range :", self.min_range_km, "km and Antenna height :", self.recv_antenna_height_meter, "meter"
+        print ("Generating pathloss maps for range :", self.min_range_km, "km and Antenna height :", self.recv_antenna_height_meter, "meter")
         owd = os.getcwd()
         os.chdir(self.splat_exp_dir)
         for qth_file in glob.glob('*.qth'):
             tx_name = os.path.splitext(qth_file)[0]
-            print "DEBUG:tx_name:",tx_name
+            filename = "/home/wings/caitao/splat/splat_data/splat_temp/" + str(tx_name) +"_pathloss.dat"
+            if os.path.isfile(filename):
+                print(str(tx_name) +"_pathloss.dat" + ": already exist!")
+                continue
+            print ("DEBUG:tx_name:",tx_name)
             call([self.splat_bin_path + "splat",\
                   "-d", str(self.terrain_dir),\
                   "-t", str(tx_name),\
@@ -112,7 +117,7 @@ class SplatExperimentRunner(object):
 
 
     def generateSplatTerrainFiles(self):
-        '''
+        '''Download terrain from
         :param min_lat:
         :param max_lat:
         :param min_lon: assumes + for western hemisphere
@@ -133,13 +138,13 @@ class SplatExperimentRunner(object):
                     lon_str = '0'+lon_str
                 terrain_file = "N"+str( lat_str )+"W"+ lon_str+".hgt.zip"
                     #------- link example: https://dds.cr.usgs.gov/srtm/version2_1/SRTM3/North_America/N10W110.hgt.zip   ----#
-                print  "Downloading Terrain file: ",terrain_file
+                print  ("Downloading Terrain file: ",terrain_file)
                 terrain_file_url = "https://dds.cr.usgs.gov/srtm/version2_1/SRTM3/North_America/"+terrain_file
                 try:
                     urlfile = urllib.URLopener()
                     urlfile.retrieve(terrain_file_url, terrain_temp_dir +"/"+str(terrain_file))
-                except IOError, e:
-                    print "warning: terrain file "+terrain_file+" not found!"
+                except IOError as e:
+                    print ("warning: terrain file "+terrain_file+" not found!")
                     continue
                 #---uncompress the zip file-----------------#
                 zip_ref = zipfile.ZipFile(terrain_temp_dir+"/"+ str(terrain_file), 'r')
@@ -157,7 +162,7 @@ class SplatExperimentRunner(object):
 
 
 
-def  runSplatExp():
+def runSplatExp():
     splat_exp_runner = SplatExperimentRunner(   tx_config_file=tx_config_file,
                                                 generic_lrp_file=generic_lrp_file,
                                                 terrain_dir=terrain_dir,
@@ -174,11 +179,22 @@ def generatePathlossMaps():
     #-------now generate the pathloss map for each transmitter -------------------#
     distutils.dir_util.mkpath(os.path.abspath(pathlossMapOutputDirectory))
     pd = ParseSplatData(ref_lat, ref_lon, limit_x, limit_y, grid_x, grid_y)
-
+    counter = 0
     for dat_file in glob.glob(splat_exp_dir+'/*.dat'):
+        #if os.path.isfile(dat_file):
+        #    counter += 1
+        #    print(dat_file, "already exists", counter)
+        #    continue
         tx_name = os.path.splitext( os.path.basename(dat_file))[0]
         outmapfile = os.path.abspath(pathlossMapOutputDirectory)+"/"+tx_name
-        pd.generateMap(dat_file , outmapfile )
+        if os.path.isfile(outmapfile+'.png'):
+            #counter += 1
+            #print(outmapfile+'.png', "already exists", counter)
+            continue
+        
+        pd.generateMap(dat_file , outmapfile)
+
+        #print(dat_file, outmapfile, 'has error')
 
 
 #------------global parameters-------------------------#
@@ -190,11 +206,11 @@ terrain_dir = './terrain_files/'
 tx_range_km = 25.0
 srtm2sdf_util_path = ''
 splat_bin_path = ''
-recv_antenna_height_meter = 20.0
+recv_antenna_height_meter = 3.0
 pathlossMapOutputDirectory = './pathloss_maps_tx_flat'
-ref_lat, ref_lon = 31.093328, -57.687580 #39.177643, -78.266090
-limit_x, limit_y = 5000.0, 5000.0
-grid_x, grid_y = 100, 100
+ref_lat, ref_lon = 40.867839, -73.105333 # (degrees)
+limit_x, limit_y = 2000.0, 2000.0        # (meters)
+grid_x, grid_y = 40, 40
 #------------------------------------------------------#
 if __name__ == '__main__':
     np.random.seed(1009993)

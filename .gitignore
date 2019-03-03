@@ -1,0 +1,4 @@
+splat_data/splat_temp
+splat_data/__pycache__
+*.pyc
+splat_data/terrain_files
