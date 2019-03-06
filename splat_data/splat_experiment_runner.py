@@ -6,6 +6,7 @@ import glob
 import os
 import shutil
 import numpy as np
+import time
 from parse_splat_data import ParseSplatData
 
 
@@ -172,7 +173,7 @@ def runSplatExp():
                                                 recv_antenna_height_meter=recv_antenna_height_meter,
                                                 tx_range_km=tx_range_km
                                              )
-    splat_exp_runner.generatePathlossFiles(isTerrainfilesAvailable=False) #set it True if terrain tiles have been already downloaded (after the first run),
+    splat_exp_runner.generatePathlossFiles(isTerrainfilesAvailable=True) #set it True if terrain tiles have been already downloaded (after the first run),
                                                                           # so will not download again
 
 def generatePathlossMaps():
@@ -213,7 +214,9 @@ limit_x, limit_y = 3200.0, 3200.0        # (meters) half the grid length
 grid_x, grid_y = 64, 64
 #------------------------------------------------------#
 if __name__ == '__main__':
+    start = time.time()
     np.random.seed(1009993)
     runSplatExp()
     generatePathlossMaps()
+    print('Total time = ', time.time() - start)
 
