@@ -99,10 +99,10 @@ class SplatExperimentRunner(object):
         os.chdir(self.splat_exp_dir)
         for qth_file in glob.glob('*.qth'):
             tx_name = os.path.splitext(qth_file)[0]
-            filename = "/home/wings/caitao/splat/splat_data/splat_temp/" + str(tx_name) +"_pathloss.dat"
-            if os.path.isfile(filename):
-                print(str(tx_name) +"_pathloss.dat" + ": already exist!")
-                continue
+            #filename = "/home/wings/caitao/splat/splat_data/splat_temp/" + str(tx_name) +"_pathloss.dat"
+            #if os.path.isfile(filename):
+            #    print(str(tx_name) +"_pathloss.dat" + ": already exist!")
+            #    continue
             print ("DEBUG:tx_name:",tx_name)
             call([self.splat_bin_path + "splat",\
                   "-d", str(self.terrain_dir),\
@@ -209,8 +209,8 @@ splat_bin_path = ''
 recv_antenna_height_meter = 3.0
 pathlossMapOutputDirectory = './pathloss_maps_tx_flat'
 ref_lat, ref_lon = 40.867839, -73.105333 # (degrees)
-limit_x, limit_y = 2000.0, 2000.0        # (meters)
-grid_x, grid_y = 40, 40
+limit_x, limit_y = 3200.0, 3200.0        # (meters) half the grid length
+grid_x, grid_y = 64, 64
 #------------------------------------------------------#
 if __name__ == '__main__':
     np.random.seed(1009993)
