@@ -3,3 +3,4 @@ splat_data/__pycache__
 *.pyc
 splat_data/terrain_files
 .idea/
+splat_data/.ipynb_checkpoints/

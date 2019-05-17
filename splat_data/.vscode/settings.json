@@ -7,5 +7,6 @@
       "--disable=E1101", "--disable=E1136",
       "--disable=W0603", "--disable=E0602",
       "--disable=C0326"
-    ] 
+    ],
+    "git.ignoreLimitWarning": true
 }

@@ -67,11 +67,11 @@ class SplatExperimentRunner(object):
                 self.tx_counter += 1
                 line_vals = line.split(',')
                 lat, lon, aheight = float( line_vals[0] ), -float( line_vals[1] ), float( line_vals[2] )
-                tx_name_prefix = 'tx_'+str(self.tx_counter)
+                tx_name_prefix = 'tx_'+ '{:04}'.format(self.tx_counter)
                 tx_file_path_prefix = self.splat_exp_dir+"/"+tx_name_prefix
                 #----create the qth file---------------#
                 with open(tx_file_path_prefix+'.qth', 'w') as tf:
-                    tf.write( tx_name_prefix+'\n'+str(lat)+'\n'+str(lon)+'\n'+str(aheight)  )
+                    tf.write( tx_name_prefix+'\n'+str(lat)+'\n'+str(lon)+'\n'+str(aheight)+'m'  )  # caitao: important fix here: 'm'
                 #----create the lrp file---------------#
                 shutil.copy( self.generic_lrp_file, tx_file_path_prefix+'.lrp' )
                 self.min_lat, self.min_lon = min( self.min_lat, lat), min( self.min_lon, lon)
@@ -98,7 +98,8 @@ class SplatExperimentRunner(object):
         print ("Generating pathloss maps for range :", self.min_range_km, "km and Antenna height :", self.recv_antenna_height_meter, "meter")
         owd = os.getcwd()
         os.chdir(self.splat_exp_dir)
-        for qth_file in glob.glob('*.qth'):
+        qth_files = sorted(glob.glob('*.qth'))
+        for qth_file in qth_files:
             tx_name = os.path.splitext(qth_file)[0]
             #filename = "/home/wings/caitao/splat/splat_data/splat_temp/" + str(tx_name) +"_pathloss.dat"
             #if os.path.isfile(filename):
@@ -111,6 +112,7 @@ class SplatExperimentRunner(object):
                   "-L", str(self.recv_antenna_height_meter),\
                   "-R", str(self.min_range_km),\
                   "-metric" ,\
+                  "-dbm",\
                   "-ano", str(tx_name)+"_pathloss.dat"\
                   ])
         os.chdir(owd)
@@ -181,20 +183,16 @@ def generatePathlossMaps():
     distutils.dir_util.mkpath(os.path.abspath(pathlossMapOutputDirectory))
     pd = ParseSplatData(ref_lat, ref_lon, limit_x, limit_y, grid_x, grid_y)
     counter = 0
-    for dat_file in glob.glob(splat_exp_dir+'/*.dat'):
-        #if os.path.isfile(dat_file):
-        #    counter += 1
-        #    print(dat_file, "already exists", counter)
-        #    continue
+    dat_files = sorted(glob.glob(splat_exp_dir+'/*.dat'))
+    for dat_file in dat_files:
         tx_name = os.path.splitext( os.path.basename(dat_file))[0]
         outmapfile = os.path.abspath(pathlossMapOutputDirectory)+"/"+tx_name
-        if os.path.isfile(outmapfile+'.png'):
+        #if os.path.isfile(outmapfile+'.png'):
             #counter += 1
             #print(outmapfile+'.png', "already exists", counter)
-            continue
+        #    continue
         
         pd.generateMap(dat_file , outmapfile)
-
         #print(dat_file, outmapfile, 'has error')
 
 
@@ -204,14 +202,14 @@ tx_config_file = './tx_configs/tx_config.txt'
 generic_lrp_file = './tx_configs/generic_tx.lrp'
 splat_exp_dir = './splat_temp/' #change this directory for new experiment, else will be overwritten
 terrain_dir = './terrain_files/'
-tx_range_km = 25.0
+tx_range_km = 7.0
 srtm2sdf_util_path = ''
 splat_bin_path = ''
-recv_antenna_height_meter = 3.0
+recv_antenna_height_meter = 15
 pathlossMapOutputDirectory = './pathloss_maps_tx_flat'
-ref_lat, ref_lon = 40.867839, -73.105333 # (degrees)
-limit_x, limit_y = 3200.0, 3200.0        # (meters) half the grid length
-grid_x, grid_y = 64, 64
+ref_lat, ref_lon = 40.764981,-72.843350  # (degrees)
+limit_x, limit_y = 2000.0, 2000.0        # (meters) half the length of entire terrain
+grid_x, grid_y   = 40, 40                # grid length
 #------------------------------------------------------#
 if __name__ == '__main__':
     start = time.time()

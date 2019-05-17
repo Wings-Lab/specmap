@@ -95,7 +95,7 @@ class ParseSplatData(object):
         #print "min x-coord, max x-coord: ", np.min(xcoords), np.max(xcoords)
         ycoords = self.getYCoords(self.ref_lat, locs)
         #print "min y-coord, max y-coord: ", np.min(ycoords), np.max(ycoords)
-        coords = np.array(zip(xcoords, ycoords), dtype = np.float )
+        coords = list(zip(xcoords, ycoords))
         return coords
 
 
@@ -118,7 +118,7 @@ class ParseSplatData(object):
 
         if showMap:
             #CS = plt.contour(xi, yi, zi, 10, linewidths= 0.5, colors='k')
-            CS = plt.contourf(xi, yi, zi, 10, cmap = 'viridis')
+            plt.contourf(xi, yi, zi, 10, cmap = 'viridis')
             plt.colorbar()
             plt.savefig(outfile+".png")
             plt.close()
